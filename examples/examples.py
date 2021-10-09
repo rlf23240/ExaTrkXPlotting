@@ -6,12 +6,12 @@ import matplotlib.pyplot as plt
 from ExaTrkXPlotting import plotter, PlotConfig
 
 
-@plotter.plot('example.1')
+@plotter.plot('example.1', ['x1', 'y1'])
 def test_plot_1(ax, data):
     ax.plot(data['x1'], data['y1'])
 
 
-@plotter.plot('example.2')
+@plotter.plot('example.2', ['x2', 'y2'])
 def test_plot_2(ax, data):
     ax.plot(data['x2'], data['y2'])
 

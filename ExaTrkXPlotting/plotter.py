@@ -19,18 +19,36 @@ class _Plotter:
     def __init__(self):
         self.plots = {}
 
-    def plot(self, name):
+    def plot(self, name, data_req: List = None):
         """
         Decoration to define a plot.
 
         :param name:
             Type name of this plot. Use in all configurations plot_figure.
+        :param data_req:
+            Data requirements.
+            This will be use to check input data before plotting.
+            Only work if data is subscriptable.
+            None if you want to disable this feature.
         :return:
             Decorator.
         """
         def decorator(func):
-            self.plots[name] = func
-            return func
+            if data_req is not None:
+                # If data check is enable, wrap func with check.
+                def wrapper(ax, data, **kwargs):
+                    for requirement in data_req:
+                        if requirement not in data:
+                            raise RuntimeError(
+                                f'Data requirement for {name} not satisfy: {requirement}'
+                            )
+                    func(ax, data, **kwargs)
+            else:
+                wrapper = func
+
+            self.plots[name] = wrapper
+
+            return wrapper
         return decorator
 
     def plot_figure(
@@ -120,7 +138,7 @@ class _Plotter:
 _plotter = _Plotter()
 
 
-def plot(name):
+def plot(name, data_req: List = None):
     """
     Decoration to define a plot.
 
@@ -128,10 +146,15 @@ def plot(name):
 
     :param name:
         Type name of this plot. Use in all configurations plot_figure.
+    :param data_req:
+            Data requirements.
+            This will be use to check input data before plotting.
+            Only work if data is subscriptable.
+            None if you want to disable this feature.
     :return:
         Decorator.
     """
-    return _plotter.plot(name)
+    return _plotter.plot(name, data_req)
 
 
 def plot_figure(
