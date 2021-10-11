@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='ExaTrkXPlotting',
@@ -16,8 +16,7 @@ setup(
         'matplotlib',
         'seaborn==0.11.1'
     ],
-    packages=[
-        'ExaTrkXPlotting',
+    packages=find_packages() + [
         'ExaTrkXPlots'
     ],
     classifiers=[
