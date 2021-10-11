@@ -35,7 +35,7 @@ class _Plotter:
         """
         def decorator(func):
             if data_req is not None:
-                # If data check is enable, wrap func with check.
+                # If data check is enable, wrap func with checking.
                 def wrapper(ax, data, **kwargs):
                     for requirement in data_req:
                         if requirement not in data:
@@ -49,6 +49,7 @@ class _Plotter:
             self.plots[name] = wrapper
 
             return wrapper
+
         return decorator
 
     def plot_figure(
@@ -138,6 +139,15 @@ class _Plotter:
 _plotter = _Plotter()
 
 
+def plots() -> List[str]:
+    """
+    Get current defined plots.
+
+    :return: List of defined plots.
+    """
+    return list(_plotter.plots.keys())
+
+
 def plot(name, data_req: List = None):
     """
     Decoration to define a plot.
@@ -147,10 +157,10 @@ def plot(name, data_req: List = None):
     :param name:
         Type name of this plot. Use in all configurations plot_figure.
     :param data_req:
-            Data requirements.
-            This will be use to check input data before plotting.
-            Only work if data is subscriptable.
-            None if you want to disable this feature.
+        Data requirements.
+        This will be use to check input data before plotting.
+        Only work if data object support `in` operation.
+        None if you want to disable this feature.
     :return:
         Decorator.
     """

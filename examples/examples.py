@@ -17,6 +17,9 @@ def test_plot_2(ax, data):
 
 
 if __name__ == '__main__':
+    # Check defined plots.
+    print('Current defined plots:', plotter.plots())
+
     # Assign data for each plot.
     fig, axes = plt.subplots(2, 2, figsize=(8, 8), tight_layout=True)
     plotter.plot_figure(fig, {

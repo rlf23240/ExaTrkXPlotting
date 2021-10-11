@@ -8,7 +8,8 @@ from matplotlib import pyplot as plt
 from ExaTrkXPlotting import plotter, PlotConfig
 
 # Include hit and pair plots.
-from ExaTrkXPlots import hits, pairs
+import ExaTrkXPlots.hits
+import ExaTrkXPlots.pairs
 
 if __name__ == '__main__':
     fig, ax = plt.subplots(1, 1, figsize=(8, 8))
