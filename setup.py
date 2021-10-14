@@ -13,6 +13,7 @@ setup(
         'PyYAML',
         'numpy',
         'pandas',
+        'scikit-learn',
         'matplotlib',
         'seaborn==0.11.1'
     ],

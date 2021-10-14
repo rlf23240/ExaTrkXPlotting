@@ -19,7 +19,7 @@ if __name__ == '__main__':
                 plot='exatrkx.hits.2d',
                 data={
                     'hits': pd.read_csv(
-                        '../data/event000001000-hits.csv'
+                        'data/events/event000001000-hits.csv'
                     )
                 }
             )

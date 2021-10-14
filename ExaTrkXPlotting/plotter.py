@@ -125,15 +125,19 @@ class _Plotter:
         return {}
 
     def _plot(self, ax, plt_config, external_config, data):
-        plt_name, plt_data, plt_args = plt_config.parse(
+        plt_type, plt_data, plt_args = plt_config.parse(
             external_config, data
         )
 
-        if plt_name in self.plots:
-            print(f'Plotting {plt_name}...')
-            self.plots[plt_name](ax, plt_data, **plt_args)
+        if isinstance(plt_type, str):
+            if plt_type in self.plots:
+                print(f'Plotting {plt_type}...')
+                self.plots[plt_type](ax, plt_data, **plt_args)
+            else:
+                raise RuntimeError(f'Plot definition not found: {plt}. Skip.')
         else:
-            raise RuntimeError(f'Plot definition not found: {plt_name}. Skip.')
+            print(f'Plotting {plt_type.__name__}...')
+            plt_type(ax, plt_data, **plt_args)
 
 
 _plotter = _Plotter()
