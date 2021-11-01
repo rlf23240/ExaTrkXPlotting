@@ -22,23 +22,38 @@ For required columns, it use for all plot require this type of dataframe.
 For optional columns, it use for special purpose and not required for all plots.
 """
 
-import math
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.collections as mc
 
 from ExaTrkXPlotting import plotter
 
 
-@plotter.plot('exatrkx.particles.production_vertex', ['pairs', 'truth', 'particles'])
+@plotter.plot('exatrkx.particles.production_vertex', ['pairs', 'hits', 'particles'])
 def production_vertices(ax, data):
     pairs = data['pairs']
-    truth = data['truth']
+    hits = data['hits']
     particles = data['particles']
 
+    if all(pd.Series(['x', 'y']).isin(hits.columns)):
+        pass
+    elif all(pd.Series(['r', 'phi']).isin(hits.columns)):
+        # Cylindrical coord.
+        r = hits['r']
+        phi = hits['phi']
+
+        # Compute cartesian coord
+        x = r * np.cos(phi)
+        y = r * np.sin(phi)
+        hits = hits.assign(
+            x=x, y=y
+        )
+    else:
+        raise KeyError('No valid coordinate data found.')
+
     hits_with_particles = pd.merge(
-        truth, particles,
+        hits, particles,
         how='inner'
     )
 
@@ -54,38 +69,53 @@ def production_vertices(ax, data):
     pairs_group_by_vertices = pairs_with_pid.groupby(['vx', 'vy', 'vz'])
 
     # Create color map.
-    colors = plt.cm.get_cmap('gunplot', len(pairs_group_by_vertices) + 1)
+    colors = plt.cm.get_cmap('gnuplot', len(pairs_group_by_vertices) + 1)
 
     for idx, (vertex, pairs) in enumerate(pairs_group_by_vertices):
         vx, vy, vz = vertex
-        vr = math.sqrt(vx ** 2 + vy ** 2)
 
         # Get color.
         color = colors(idx)
 
         ax.scatter(
-            vz, vr,
+            vx, vy,
             marker='+',
             color=color,
-            label=f'({vz}, {vr})'
+            label=f'({vx}, {vy})'
         )
 
 
-@plotter.plot('exatrkx.particles.types', ['pairs', 'truth', 'particles'])
+@plotter.plot('exatrkx.particles.types', ['pairs', 'hits', 'particles'])
 def particle_types(ax, data):
+    hits = data['hits']
     pairs = data['pairs']
-    truth = data['truth']
     particles = data['particles']
 
+    if all(pd.Series(['x', 'y']).isin(hits.columns)):
+        pass
+    elif all(pd.Series(['r', 'phi']).isin(hits.columns)):
+        # Cylindrical coord.
+        r = hits['r']
+        phi = hits['phi']
+
+        # Compute cartesian coord
+        x = r * np.cos(phi)
+        y = r * np.sin(phi)
+        hits = hits.assign(
+            x=x, y=y
+        )
+    else:
+        raise KeyError('No valid coordinate data found.')
+
     hits_with_particles = pd.merge(
-        truth, particles,
+        hits, particles,
         how='inner'
     )
 
     pairs_with_pid = pd.merge(
         pairs,
         hits_with_particles,
-        left_on='hit_id_1',
+        left_on='hit_id_2',
         right_on='hit_id',
         how="inner"
     )
@@ -99,9 +129,83 @@ def particle_types(ax, data):
             particle_type = int(tracks['particle_type'].iloc[0])
 
             if 'r_2' not in tracks.columns:
-                tracks['r_2'] = np.sqrt(tracks['x_2']**2 + tracks['y_2']**2)
+                tracks['r_2'] = np.sqrt(tracks['x']**2 + tracks['y']**2)
 
-            r2, z2 = tracks.loc[
+            x, y = tracks.loc[
                 tracks['r_2'].idxmax()
-            ][['r_2', 'z_2']]
-            ax.annotate(particle_type, (z2, r2))
+            ][['x', 'y']]
+            ax.annotate(particle_type, (x, y))
+
+
+@plotter.plot('exatrkx.particles.tracks_with_production_vertex.2d', ['pairs', 'hits', 'particles'])
+def particle_track_with_production_vertex(ax, data, line_width=0.1):
+    """
+    Plot hit pair 2D connections. Require hits dataframe and pairs dataframe.
+    """
+    hits = data['hits']
+    pairs = data['pairs']
+    particles = data['particles']
+
+    if all(pd.Series(['x', 'y']).isin(hits.columns)):
+        pass
+    elif all(pd.Series(['r', 'phi']).isin(hits.columns)):
+        # Cylindrical coord.
+        r = hits['r']
+        phi = hits['phi']
+
+        # Compute cartesian coord
+        x = r * np.cos(phi)
+        y = r * np.sin(phi)
+        hits = hits.assign(
+            x=x, y=y
+        )
+    else:
+        raise KeyError('No valid coordinate data found.')
+
+    hits_with_particles = pd.merge(
+        hits, particles,
+        how='inner'
+    )
+
+    pairs = pd.merge(
+        pairs, hits_with_particles,
+        left_on='hit_id_1',
+        right_on='hit_id'
+    )
+
+    pairs = pd.merge(
+        pairs, hits_with_particles,
+        left_on='hit_id_2',
+        right_on='hit_id',
+        suffixes=('_1', '_2')
+    )
+
+    # Group by vertex.
+    pairs_group_by_vertices = pairs.groupby(['vx_1', 'vy_1', 'vz_1'])
+
+    # Create color map.
+    colors = plt.cm.get_cmap('gnuplot', len(pairs_group_by_vertices) + 1)
+
+    for idx, (vertex, pairs) in enumerate(pairs_group_by_vertices):
+        # Get color.
+        color = colors(idx)
+
+        for particle_id, tracks in pairs.groupby('particle_id_1'):
+            positions = pairs[['x_1', 'y_1', 'x_2', 'y_2']].to_numpy()
+            position_pairs = [((x1, y1), (x2, y2)) for x1, y1, x2, y2 in positions]
+            line_collection = mc.LineCollection(
+                position_pairs,
+                linewidths=line_width,
+                color=color
+            )
+            ax.add_collection(line_collection)
+
+        vx, vy, vz = vertex
+        ax.scatter(
+            vx, vy,
+            marker='+',
+            color=color,
+            label=f'({vx}, {vy})'
+        )
+
+    ax.legend()

@@ -24,6 +24,7 @@ For optional columns, it use for special purpose and not required for all plots.
 
 from typing import Any
 
+import numpy as np
 import pandas as pd
 from matplotlib import collections as mc
 
@@ -38,12 +39,29 @@ def hit_pair_plot(ax, data, line_width=0.1, label=None, color=None):
     hits = data['hits']
     pairs = data['pairs']
 
+    if all(pd.Series(['x', 'y']).isin(hits.columns)):
+        pass
+    elif all(pd.Series(['r', 'phi']).isin(hits.columns)):
+        # Cylindrical coord.
+        r = hits['r']
+        phi = hits['phi']
+
+        # Compute cartesian coord
+        x = r * np.cos(phi)
+        y = r * np.sin(phi)
+        hits = hits.assign(
+            x=x, y=y
+        )
+    else:
+        raise KeyError('No valid coordinate data found.')
+
     pairs = pd.merge(
         pairs, hits,
         left_on='hit_id_1',
         right_on='hit_id'
     )
-    pairs = pairs.merge(
+
+    pairs = pd.merge(
         pairs, hits,
         left_on='hit_id_2',
         right_on='hit_id',

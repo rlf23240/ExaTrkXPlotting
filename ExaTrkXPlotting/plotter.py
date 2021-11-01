@@ -55,7 +55,7 @@ class _Plotter:
     def plot_figure(
         self,
         fig: Figure,
-        axes: Dict[Axes, PlotConfig],
+        axes: Dict[Axes, Union[PlotConfig, List[PlotConfig]]],
         config: Any = None,
         data: Any = None,
         save: Union[PathLike, AnyStr] = None
@@ -173,7 +173,7 @@ def plot(name, data_req: List = None):
 
 def plot_figure(
     fig: Figure,
-    axes: Dict[Axes, PlotConfig],
+    axes: Dict[Axes, Union[PlotConfig, List[PlotConfig]]],
     config: Union[PathLike, AnyStr] = None,
     data: Any = None,
     save: Union[PathLike, AnyStr] = None
