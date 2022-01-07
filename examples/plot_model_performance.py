@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 # Plotter.
-from ExaTrkXPlotting import plotter, PlotConfig
+from ExaTrkXPlotting import Plotter, PlotConfig
 
 # Include performance plots.
 import ExaTrkXPlots.performance
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     )
     """
 
-    plotter.plot_figure(
+    Plotter(
         fig, {
             ax[0, 0]: PlotConfig(
                 plot='exatrkx.performance.score_distribution'
@@ -50,4 +50,4 @@ if __name__ == '__main__':
             'truth': truth,
             'score': score
         }
-    )
+    ).plot()

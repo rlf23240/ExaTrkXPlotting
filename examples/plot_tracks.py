@@ -6,7 +6,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 # Plotter.
-from ExaTrkXPlotting import plotter, PlotConfig
+from ExaTrkXPlotting import Plotter, PlotConfig
 
 # Include track plots.
 import ExaTrkXPlots.tracks
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     reconstructable = df[df.is_trackable]
     matched = df[df.is_trackable & df.is_matched]
 
-    plotter.plot_figure(
+    Plotter(
         fig, {
             ax[0, 0]: PlotConfig(
                 plot='exatrkx.tracks.distribution',
@@ -61,4 +61,4 @@ if __name__ == '__main__':
             'reconstructable': reconstructable,
             'matched': matched
         }
-    )
+    ).plot()

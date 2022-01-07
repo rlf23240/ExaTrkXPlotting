@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     # Use object orientated method to dynamic crate figure.
     fig, axes = plt.subplots(2, 2, figsize=(8, 8), tight_layout=True)
-    plotter = Plotter(fig, axes)
+    plotter = Plotter(fig)
     plotter.data = {
         'x1': [1, 2, 3],
         'y1': [1, 2, 3],

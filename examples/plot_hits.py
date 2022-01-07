@@ -5,7 +5,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 # Plotter.
-from ExaTrkXPlotting import plotter, PlotConfig
+from ExaTrkXPlotting import Plotter, PlotConfig
 
 # Include hit and pair plots.
 import ExaTrkXPlots.hits
@@ -13,7 +13,7 @@ import ExaTrkXPlots.pairs
 
 if __name__ == '__main__':
     fig, ax = plt.subplots(1, 1, figsize=(8, 8))
-    plotter.plot_figure(
+    Plotter(
         fig, {
             ax: PlotConfig(
                 plot='exatrkx.hits.2d',
@@ -24,4 +24,4 @@ if __name__ == '__main__':
                 }
             )
         }
-    )
+    ).plot()

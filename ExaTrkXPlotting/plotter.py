@@ -21,57 +21,44 @@ class Plotter:
     def __init__(
         self,
         fig: Figure,
-        axes: Union[np.ndarray, Axes, Dict[Axes, PlotConfig]],
+        plots: Any = None,
         data: Any = None,
         config: Any = None,
-        # Figure level settings.
-        # TODO: rcParam support?
-        font: dict = None,
-        font_size: int = None
     ):
         """
         Plotter of a figure.
 
         :param fig:
             matplotlib Figure object.
-        :param axes:
+        :param plots:
             Configurations define how to plot each axes.
         :param config:
             Single or list of external configuration file path or config dict.
         :param data:
             Data pass to all plotting function if no data assign in configuration.
-        :param font:
-            Dictionary with font setting.
-        :param font_size:
-            Font size. If set it will overwrite setting in font parameter.
         """
         self.fig = fig
-        if isinstance(axes, Axes):
-            self.plots = {axes: None}
-        elif isinstance(axes, np.ndarray):
-            self.plots = dict.fromkeys(axes.flatten())
-        elif isinstance(axes, dict):
-            self.plots = axes
+        self.plots = {axes: [] for axes in fig.get_axes()}
+
+        if plots is not None:
+            for ax, plot_config in plots.items():
+                self.plots[ax] = plot_config
 
         self.config = config
         self.data = data
-        self.font = font
-        self.font_size = font_size
 
     def plot(
-        self, save: Union[PathLike, AnyStr] = None
+        self, save: Union[PathLike, AnyStr] = None, close: bool = True
     ):
         """
         Plot the figure.
 
         :param save:
             Figure save location. None if you want to show plot instead of save it.
+        :param close:
+            Whether close figure after plot complete to clean memory.
+            This might be unwanted if you want to plot multiple time on same figure.
         """
-        if self.font is not None:
-            plt.rcParams.update('font', **self.font)
-        if self.font_size is not None:
-            plt.rcParams.update('font.size', self.font_size)
-
         t_start = time()
 
         external_config = self._parse_external_configuration(self.config)
@@ -99,6 +86,10 @@ class Plotter:
             )
         else:
             plt.show()
+
+        # Clean up.
+        if close:
+            plt.close(self.fig)
 
     def _parse_external_configuration(self, config) -> Dict[str, Any]:
         if isinstance(config, list):
