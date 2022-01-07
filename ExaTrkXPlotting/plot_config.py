@@ -10,7 +10,7 @@ class PlotConfig:
     """
     def __init__(
         self,
-        plot=None,
+        plot: Any = None,
         data: Any = None,
         config: Any = None,
         args: Dict = None
@@ -19,7 +19,7 @@ class PlotConfig:
         Define a plot configuration.
 
         :param plot:
-            Plot type ID or callable plotting function.
+            Plot type ID or plotting object.
         :param data:
             Data pass to plotting function.
         :param config:

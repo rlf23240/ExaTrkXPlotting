@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from typing import List
+import functools
 
 from .plot_manager import plot_manager
 
 
-class _Plot:
+class Plot:
     """
     Plotting function wrapper.
     """
@@ -43,4 +44,12 @@ def plot(name: str, data_requirements: List = None):
     :return:
         Decorator.
     """
-    return lambda func: _Plot(name, data_requirements, func)
+    def decorator(func):
+        plot = Plot(name, data_requirements, func)
+
+        # Copy docstring and function signature.
+        functools.update_wrapper(plot, func)
+
+        return plot
+
+    return decorator
