@@ -25,10 +25,10 @@ For optional columns, it use for special purpose and not required for all plots.
 import numpy as np
 import pandas as pd
 
-from ExaTrkXPlotting import plotter
+from ExaTrkXPlotting import plot
 
 
-@plotter.plot('exatrkx.hits.2d', ['hits'])
+@plot('exatrkx.hits.2d', ['hits'])
 def hit_plot(ax, data, hit_filter=None, label=None, color=None):
     """
     Plot hit 2D positions. Require hits dataframe.

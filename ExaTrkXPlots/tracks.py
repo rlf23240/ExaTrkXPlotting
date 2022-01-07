@@ -22,10 +22,10 @@ import math
 
 import numpy as np
 
-from ExaTrkXPlotting import plotter
+from ExaTrkXPlotting import plot
 
 
-@plotter.plot('exatrkx.tracks.distribution', ['generated', 'reconstructable', 'matched'])
+@plot('exatrkx.tracks.distribution', ['generated', 'reconstructable', 'matched'])
 def tracks(ax, data, x_variable, x_label, bins, track_filter=None, log_scale=False):
     """
     Plot track histogram.
@@ -104,7 +104,7 @@ def _efficiency(matched, population):
     return efficiency, error
 
 
-@plotter.plot('exatrkx.tracks.efficiency', ['generated', 'reconstructable', 'matched'])
+@plot('exatrkx.tracks.efficiency', ['generated', 'reconstructable', 'matched'])
 def track_efficiency(ax, data, x_variable, x_label, bins, track_filter=None):
     """
     Plot track efficiency, both physical and technical, define as

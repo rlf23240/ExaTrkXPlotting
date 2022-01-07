@@ -28,10 +28,10 @@ import numpy as np
 import pandas as pd
 from matplotlib import collections as mc
 
-from ExaTrkXPlotting import plotter
+from ExaTrkXPlotting import plot
 
 
-@plotter.plot('exatrkx.hit_pairs.2d', ['hits', 'pairs'])
+@plot('exatrkx.hit_pairs.2d', ['hits', 'pairs'])
 def hit_pair_plot(ax, data, line_width=0.1, label=None, color=None):
     """
     Plot hit pair 2D connections. Require hits dataframe and pairs dataframe.
@@ -82,7 +82,7 @@ def hit_pair_plot(ax, data, line_width=0.1, label=None, color=None):
         ax.legend()
 
 
-@plotter.plot('exatrkx.hit_pairs.hist', ['edges'])
+@plot('exatrkx.hit_pairs.hist', ['edges'])
 def edge_hist(
     ax,
     data,

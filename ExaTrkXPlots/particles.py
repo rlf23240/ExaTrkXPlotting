@@ -27,10 +27,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.collections as mc
 
-from ExaTrkXPlotting import plotter
+from ExaTrkXPlotting import plot
 
 
-@plotter.plot('exatrkx.particles.production_vertex', ['pairs', 'hits', 'particles'])
+@plot('exatrkx.particles.production_vertex', ['pairs', 'hits', 'particles'])
 def production_vertices(ax, data):
     pairs = data['pairs']
     hits = data['hits']
@@ -85,7 +85,7 @@ def production_vertices(ax, data):
         )
 
 
-@plotter.plot('exatrkx.particles.types', ['pairs', 'hits', 'particles'])
+@plot('exatrkx.particles.types', ['pairs', 'hits', 'particles'])
 def particle_types(ax, data):
     hits = data['hits']
     pairs = data['pairs']
@@ -137,7 +137,7 @@ def particle_types(ax, data):
             ax.annotate(particle_type, (x, y))
 
 
-@plotter.plot('exatrkx.particles.tracks_with_production_vertex.2d', ['pairs', 'hits', 'particles'])
+@plot('exatrkx.particles.tracks_with_production_vertex.2d', ['pairs', 'hits', 'particles'])
 def particle_track_with_production_vertex(ax, data, line_width=0.1):
     """
     Plot hit pair 2D connections. Require hits dataframe and pairs dataframe.

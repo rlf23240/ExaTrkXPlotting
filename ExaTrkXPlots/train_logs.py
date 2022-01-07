@@ -16,10 +16,10 @@ For plot data requirement, detail list below:
 import numpy as np
 from matplotlib.ticker import MaxNLocator
 
-from ExaTrkXPlotting import plotter
+from ExaTrkXPlotting import plot
 
 
-@plotter.plot('exatrkx.train_log', ['history'])
+@plot('exatrkx.train_log', ['history'])
 def train_log(ax, data, tag=None, y_label=None, steps_per_epoch=1, label=None):
     history = data['history']
     if tag is None:

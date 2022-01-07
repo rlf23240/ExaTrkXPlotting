@@ -1,67 +1,36 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from typing import Union, Dict, List, Any, AnyStr
+from typing import Union, Dict, Any, AnyStr
 from os import PathLike
 from pathlib import Path
 from time import time
 
 import yaml
 
+import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 from .plot_config import PlotConfig
+from .plot_manager import plot_manager
 
 
-class _Plotter:
-    def __init__(self):
-        self.plots = {}
-
-    def plot(self, name, data_req: List = None):
-        """
-        Decoration to define a plot.
-
-        :param name:
-            Type name of this plot. Use in all configurations plot_figure.
-        :param data_req:
-            Data requirements.
-            This will be use to check input data before plotting.
-            Only work if data is subscriptable.
-            None if you want to disable this feature.
-        :return:
-            Decorator.
-        """
-        def decorator(func):
-            if data_req is not None:
-                # If data check is enable, wrap func with checking.
-                def wrapper(ax, data, **kwargs):
-                    for requirement in data_req:
-                        if requirement not in data:
-                            raise RuntimeError(
-                                f'Data requirement for {name} not satisfy: {requirement}'
-                            )
-                    func(ax, data, **kwargs)
-            else:
-                wrapper = func
-
-            self.plots[name] = wrapper
-
-            return wrapper
-
-        return decorator
-
-    def plot_figure(
+class Plotter:
+    def __init__(
         self,
         fig: Figure,
-        axes: Dict[Axes, Union[PlotConfig, List[PlotConfig]]],
-        config: Any = None,
+        axes: Union[np.ndarray, Axes, Dict[Axes, PlotConfig]],
         data: Any = None,
-        save: Union[PathLike, AnyStr] = None
+        config: Any = None,
+        # Figure level settings.
+        # TODO: rcParam support?
+        font: dict = None,
+        font_size: int = None
     ):
         """
-        Plot a figure.
+        Plotter of a figure.
 
         :param fig:
             matplotlib Figure object.
@@ -71,30 +40,58 @@ class _Plotter:
             Single or list of external configuration file path or config dict.
         :param data:
             Data pass to all plotting function if no data assign in configuration.
+        :param font:
+            Dictionary with font setting.
+        :param font_size:
+            Font size. If set it will overwrite setting in font parameter.
+        """
+        self.fig = fig
+        if isinstance(axes, Axes):
+            self.plots = {axes: None}
+        elif isinstance(axes, np.ndarray):
+            self.plots = dict.fromkeys(axes.flatten())
+        elif isinstance(axes, dict):
+            self.plots = axes
+
+        self.config = config
+        self.data = data
+        self.font = font
+        self.font_size = font_size
+
+    def plot(
+        self, save: Union[PathLike, AnyStr] = None
+    ):
+        """
+        Plot the figure.
+
         :param save:
             Figure save location. None if you want to show plot instead of save it.
-        :return:
         """
+        if self.font is not None:
+            plt.rcParams.update('font', **self.font)
+        if self.font_size is not None:
+            plt.rcParams.update('font.size', self.font_size)
+
         t_start = time()
 
-        external_config = self._parse_external_configuration(config)
+        external_config = self._parse_external_configuration(self.config)
 
-        for (ax, plt_config) in axes.items():
+        for (ax, plt_config) in self.plots.items():
             if isinstance(plt_config, list):
                 # If configuration is list
                 # overlap different plot on same axes.
                 for subplot_config in plt_config:
                     try:
-                        self._plot(ax, subplot_config, external_config, data)
+                        self._plot(ax, subplot_config, external_config, self.data)
                     except RuntimeError as error:
                         print(error)
                         continue
             else:
-                self._plot(ax, plt_config, external_config, data)
+                self._plot(ax, plt_config, external_config, self.data)
 
         if save is not None:
             save = Path(save)
-            fig.savefig(save)
+            self.fig.savefig(save)
 
             print(
                 f'Plot complete in {time()-t_start:.4f} second.\n'
@@ -130,67 +127,17 @@ class _Plotter:
         )
 
         if isinstance(plt_type, str):
-            if plt_type in self.plots:
+            if plt_type in plot_manager.plots():
                 print(f'Plotting {plt_type}...')
-                self.plots[plt_type](ax, plt_data, **plt_args)
+                plot_manager.plot(plt_type)(ax, plt_data, **plt_args)
             else:
-                raise RuntimeError(f'Plot definition not found: {plt}. Skip.')
+                raise RuntimeError(f'Plot definition not found: {plt_type}. Skip.')
         else:
-            print(f'Plotting {plt_type.__name__}...')
+            print(f'Plotting {plt_type.name}...')
             plt_type(ax, plt_data, **plt_args)
 
+    def __getitem__(self, ax):
+        return self.plots[ax]
 
-_plotter = _Plotter()
-
-
-def plots() -> List[str]:
-    """
-    Get current defined plots.
-
-    :return: List of defined plots.
-    """
-    return list(_plotter.plots.keys())
-
-
-def plot(name, data_req: List = None):
-    """
-    Decoration to define a plot.
-
-    A plot must have function signature (ax, data, kwargs...)
-
-    :param name:
-        Type name of this plot. Use in all configurations plot_figure.
-    :param data_req:
-        Data requirements.
-        This will be use to check input data before plotting.
-        Only work if data object support `in` operation.
-        None if you want to disable this feature.
-    :return:
-        Decorator.
-    """
-    return _plotter.plot(name, data_req)
-
-
-def plot_figure(
-    fig: Figure,
-    axes: Dict[Axes, Union[PlotConfig, List[PlotConfig]]],
-    config: Union[PathLike, AnyStr] = None,
-    data: Any = None,
-    save: Union[PathLike, AnyStr] = None
-):
-    """
-    Plot a figure.
-
-    :param fig:
-        matplotlib Figure object.
-    :param axes:
-        Configurations define how to plot each axes.
-    :param config:
-        Single or list of external configuration file path or config dict.
-    :param data:
-        Data pass to all plotting function if no data assign in configuration.
-    :param save:
-        Figure save location. None if you want to show plot instead of save it.
-    :return:
-    """
-    return _plotter.plot_figure(fig, axes, config, data, save=save)
+    def __setitem__(self, ax, value):
+        self.plots[ax] = value

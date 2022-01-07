@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from ExaTrkXPlotting import plotter
+from ExaTrkXPlotting import plot
 
 import sklearn.metrics
 
 
-@plotter.plot('exatrkx.performance.score_distribution', ['truth', 'score'])
+@plot('exatrkx.performance.score_distribution', ['truth', 'score'])
 def score_distribution(
     ax,
     data,
@@ -56,7 +56,7 @@ def score_distribution(
         ax.set_title(title)
 
 
-@plotter.plot('exatrkx.performance.roc_curve', ['truth', 'score'])
+@plot('exatrkx.performance.roc_curve', ['truth', 'score'])
 def score_roc_curve(
     ax,
     data,
@@ -112,7 +112,7 @@ def score_roc_curve(
         ax.set_title(title)
 
 
-@plotter.plot('exatrkx.performance.precision_recall_with_threshold', ['truth', 'score'])
+@plot('exatrkx.performance.precision_recall_with_threshold', ['truth', 'score'])
 def precision_recall_with_threshold(
     ax,
     data,
@@ -156,7 +156,7 @@ def precision_recall_with_threshold(
         ax.set_title(title)
 
 
-@plotter.plot('exatrkx.performance.precision_recall', ['truth', 'score'])
+@plot('exatrkx.performance.precision_recall', ['truth', 'score'])
 def precision_recall_curve(
     ax,
     data,
