@@ -32,7 +32,7 @@ from ExaTrkXPlotting import plot
 
 
 @plot('exatrkx.hit_pairs.2d', ['hits', 'pairs'])
-def hit_pair_plot(ax, data, line_width=0.1, label=None, color=None):
+def hit_pair_plot(ax, data, line_opts=None):
     """
     Plot hit pair 2D connections. Require hits dataframe and pairs dataframe.
     """
@@ -70,16 +70,17 @@ def hit_pair_plot(ax, data, line_width=0.1, label=None, color=None):
 
     positions = pairs[['x_1', 'y_1', 'x_2', 'y_2']].to_numpy()
     position_pairs = [((x1, y1), (x2, y2)) for x1, y1, x2, y2 in positions]
+
+    line_opts = {
+        'linewidths': 0.1
+    } | (line_opts or {})
+
     line_collection = mc.LineCollection(
-        position_pairs,
-        linewidths=line_width,
-        color=color,
-        label=label
+        position_pairs, **line_opts
     )
     ax.add_collection(line_collection)
 
-    if label is not None:
-        ax.legend()
+    ax.legend()
 
 
 @plot('exatrkx.hit_pairs.hist', ['edges'])
@@ -87,12 +88,8 @@ def edge_hist(
     ax,
     data,
     feature: str,
-    bins=None,
     edge_filter=None,
-    log_scale: bool = False,
-    normalize: bool = False,
-    label: str = None,
-    color: Any = None
+    hist_opts: dict=None
 ):
     """
     Plot edge histogram. Require edges dataframe.
@@ -103,16 +100,14 @@ def edge_hist(
         edges = edges[edge_filter]
 
     ax.set_xlabel(feature)
+
+    hist_opts = {
+        'lw': 2,
+        'log': False,
+        'density': False
+    } | (his_opts or {})
     ax.hist(
-        edges[feature],
-        histtype='step',
-        lw=2,
-        bins=bins,
-        log=log_scale,
-        density=normalize,
-        label=label,
-        color=color
+        edges[feature], histtype='step', **hist_opts
     )
 
-    if label is not None:
-        ax.legend()
+    ax.legend()

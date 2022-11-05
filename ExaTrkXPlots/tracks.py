@@ -30,22 +30,20 @@ from ExaTrkXPlotting import plot
 def tracks(
     ax,
     data,
-    x_variable,
-    x_label,
     bins,
+    var_col,
+    var_name = None,
     track_filter: Callable = None,
-    log_scale: bool = False
+    hist_opts: dict = None,
 ):
     """
     Plot track histogram.
 
     :param ax: matplotlib axis object.
     :param data: Data. Must contain column used in x_variable and track_filter.
-    :param x_variable: X axis of distribution. Must exist in data.
-    :param x_label: X label string.
-    :param bins: Bins of histogram.
+    :param var_col: Column name to use as x axis of distribution. Must exist in data.
+    :param var_name: Name to display as x axis label. Same as var_col if None.
     :param track_filter: Plot track pass filter only.
-    :param log_scale: Enable log scale.
     :return:
     """
     generated = data['generated']
@@ -58,33 +56,35 @@ def tracks(
         reconstructable = reconstructable[track_filter(reconstructable)]
         matched = matched[track_filter(matched)]
 
+    hist_opts = {
+        'lw': 2,
+        'log': False
+    } | (hist_opts or {})
+
     ax.hist(
-        generated[x_variable],
+        generated[var_col],
         label='Generated',
         histtype='step',
-        lw=2,
-        log=log_scale,
         bins=bins,
+        **hist_opts
     )
     ax.hist(
-        reconstructable[x_variable],
+        reconstructable[var_col],
         label='Reconstructable',
         histtype='step',
-        lw=2,
-        log=log_scale,
-        bins=bins
+        bins=bins,
+        **hist_opts
     )
     ax.hist(
-        matched[x_variable],
+        matched[var_col],
         label='Matched',
         histtype='step',
-        lw=2,
-        log=log_scale,
-        bins=bins
+        bins=bins,
+        **hist_opts
     )
 
     ax.set_ylabel('Events')
-    ax.set_xlabel(x_label)
+    ax.set_xlabel(var_name or var_col)
 
     ax.legend()
     ax.grid(True)
@@ -114,7 +114,9 @@ def _efficiency(matched, population):
 
 
 @plot('exatrkx.tracks.efficiency', ['generated', 'reconstructable', 'matched'])
-def tracking_efficiency(ax, data, x_variable, x_label, bins, track_filter=None):
+def tracking_efficiency(
+    ax, data, bins, var_col, var_name=None, track_filter=None, errbar_opts=None
+):
     """
     Plot track efficiency, both physical and technical, define as
 
@@ -124,8 +126,8 @@ def tracking_efficiency(ax, data, x_variable, x_label, bins, track_filter=None):
 
     :param ax: matplotlib axis object.
     :param data: Data. Must contain column used in x_variable and track_filter.
-    :param x_variable: X axis of distribution. Must exist in data.
-    :param x_label: X label string.
+    :param var_col: Column name to use as x axis of distribution. Must exist in data.
+    :param var_name: Name to display as x axis label. Same as var_col if None.
     :param bins: Bins of histogram.
     :param track_filter: Plot track pass filter only.
     :return:
@@ -142,9 +144,9 @@ def tracking_efficiency(ax, data, x_variable, x_label, bins, track_filter=None):
         matched = matched[track_filter]
 
     # Compute histogram.
-    gen_hist, gen_bins = np.histogram(generated[x_variable], bins=bins)
-    reco_hist, reco_bins = np.histogram(reconstructable[x_variable], bins=bins)
-    matched_hist, matched_bins = np.histogram(matched[x_variable], bins=bins)
+    gen_hist, gen_bins = np.histogram(generated[var_col], bins=bins)
+    reco_hist, reco_bins = np.histogram(reconstructable[var_col], bins=bins)
+    matched_hist, matched_bins = np.histogram(matched[var_col], bins=bins)
 
     # Compute x location and error for each bin.
     xvals, xerrs = [], []
@@ -160,23 +162,27 @@ def tracking_efficiency(ax, data, x_variable, x_label, bins, track_filter=None):
         matched_hist, reco_hist
     )
 
-    ax.set_ylim(0.0, 1.0)
-
     # Plot physical and technical efficiency.
-    ax.set_ylim(0.0, 1.0)
+    ax.set_ylim(0.0, 1.05)
+
+    errbar_opts = {
+        'fmt': 'o',
+        'lw': 2
+    } | (errbar_opts or {})
     ax.errorbar(
         xvals, physical_efficiency,
         xerr=xerrs, yerr=physical_efficiency_error,
-        fmt='o', lw=2, label='Physical Efficiency'
+        label='Physical Efficiency',
+        **errbar_opts
     )
     ax.errorbar(
         xvals, technical_efficiency,
         xerr=xerrs, yerr=technical_efficiency_error,
-        fmt='o', lw=2, label='Technical Efficiency'
+        label='Technical Efficiency',
+        **errbar_opts
     )
 
-    if x_label is not None:
-        ax.set_xlabel(x_label)
+    ax.set_xlabel(var_name or var_col)
 
     ax.legend()
     ax.grid(True)
@@ -186,11 +192,11 @@ def tracking_efficiency(ax, data, x_variable, x_label, bins, track_filter=None):
 def tracking_efficiency_techical(
     ax,
     data,
-    x_variable,
-    x_label,
     bins,
+    var_col,
+    var_name: str = None,
     track_filter: Callable = None,
-    label: str = None
+    errbar_opts: dict = None
 ):
     """
     Plot techical tracking efficiency, define as
@@ -199,8 +205,8 @@ def tracking_efficiency_techical(
 
     :param ax: matplotlib axis object.
     :param data: Data. Must contain column used in x_variable and track_filter.
-    :param x_variable: X axis of distribution. Must exist in data.
-    :param x_label: X label string.
+    :param var_col: Column name to use as x axis of distribution. Must exist in data.
+    :param var_name: Name to display as x axis label. Same as var_col if None.
     :param bins: Bins of histogram.
     :param track_filter: Plot track pass filter only.
     :return:
@@ -232,16 +238,20 @@ def tracking_efficiency_techical(
         matched_hist, reco_hist
     )
 
+    ax.set_ylim(0.0, 1.05)
+
     # Plot technical efficiency.
-    ax.set_ylim(0.0, 1.0)
+    errbar_opts = {
+        'fmt': 'o',
+        'lw': 2
+    } | (errbar_opts or {})
     ax.errorbar(
         xvals, technical_efficiency,
         xerr=xerrs, yerr=technical_efficiency_error,
-        fmt='o', lw=2, label=label
+        **errbar_opts
     )
 
-    if x_label is not None:
-        ax.set_xlabel(x_label)
+    ax.set_xlabel(var_name or var_col)
 
     ax.legend()
     ax.grid(True)
@@ -251,11 +261,10 @@ def tracking_efficiency_techical(
 def tracking_efficiency_physical(
     ax,
     data,
-    x_variable,
-    x_label,
     bins,
+    var_col,
+    var_name=None,
     track_filter: Callable = None,
-    label: str = None
 ):
     """
     Plot physical tracking efficiency, define as
@@ -264,9 +273,9 @@ def tracking_efficiency_physical(
 
     :param ax: matplotlib axis object.
     :param data: Data. Must contain column used in x_variable and track_filter.
-    :param x_variable: X axis of distribution. Must exist in data.
-    :param x_label: X label string.
     :param bins: Bins of histogram.
+    :param var_col: Column name to use as x axis of distribution. Must exist in data.
+    :param var_name: Name to display as x axis label. Same as var_col if None.
     :param track_filter: Plot track pass filter only.
     :return:
     """
@@ -282,9 +291,9 @@ def tracking_efficiency_physical(
         matched = matched[track_filter(matched)]
 
     # Compute histogram.
-    gen_hist, gen_bins = np.histogram(generated[x_variable], bins=bins)
-    reco_hist, reco_bins = np.histogram(reconstructable[x_variable], bins=bins)
-    matched_hist, matched_bins = np.histogram(matched[x_variable], bins=bins)
+    gen_hist, gen_bins = np.histogram(generated[var_col], bins=bins)
+    reco_hist, reco_bins = np.histogram(reconstructable[var_col], bins=bins)
+    matched_hist, matched_bins = np.histogram(matched[var_col], bins=bins)
 
     # Compute x location and error for each bin.
     xvals, xerrs = [], []
@@ -297,16 +306,21 @@ def tracking_efficiency_physical(
         matched_hist, gen_hist
     )
 
+    ax.set_ylim(0.0, 1.05)
+
     # Plot physical efficiency.
-    ax.set_ylim(0.0, 1.0)
+    errbar_opts = {
+        'fmt': 'o',
+        'lw': 2
+    } | (errbar_opts or {})
     ax.errorbar(
         xvals, physical_efficiency,
         xerr=xerrs, yerr=physical_efficiency_error,
-        fmt='o', lw=2, label=label
+        **errbar_opts
     )
 
-    if x_label is not None:
-        ax.set_xlabel(x_label)
+    ax.set_xlabel(var_name or var_col)
 
     ax.legend()
     ax.grid(True)
+

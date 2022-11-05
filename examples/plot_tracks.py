@@ -26,33 +26,33 @@ if __name__ == '__main__':
             ax[0, 0]: PlotConfig(
                 plot='exatrkx.tracks.distribution',
                 args={
-                    'x_variable': 'pt',
-                    'x_label': '$p_T$ [GeV]',
+                    'var_col': 'pt',
+                    'var_name': '$p_T$ [GeV]',
                     'bins': np.arange(0, 10.5, 0.5)
                 }
             ),
             ax[0, 1]: PlotConfig(
                 plot='exatrkx.tracks.efficiency',
                 args={
-                    'x_variable': 'pt',
-                    'x_label': '$p_T$ [GeV]',
+                    'var_col': 'pt',
+                    'var_name': '$p_T$ [GeV]',
                     'bins': np.arange(0, 10.5, 0.5)
                 }
             ),
             ax[1, 0]: PlotConfig(
                 plot='exatrkx.tracks.distribution',
                 args={
-                    'x_variable': 'eta',
-                    'x_label': r'$\eta$',
-                    'bins': np.arange(-4.4, 4.4, 0.4)
+                    'var_col': 'eta',
+                    'var_name': r'$\eta$',
+                    'bins': np.arange(-4.0, 4.1, 0.4)
                 }
             ),
             ax[1, 1]: PlotConfig(
                 plot='exatrkx.tracks.efficiency',
                 args={
-                    'x_variable': 'eta',
-                    'x_label': r'$\eta$',
-                    'bins': np.arange(-4.4, 4.4, 0.4)
+                    'var_col': 'eta',
+                    'var_name': r'$\eta$',
+                    'bins': np.arange(-4.0, 4.1, 0.4)
                 }
             )
         },
@@ -62,3 +62,4 @@ if __name__ == '__main__':
             'matched': matched
         }
     ).plot()
+

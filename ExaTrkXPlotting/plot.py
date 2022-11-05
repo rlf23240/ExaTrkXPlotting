@@ -18,7 +18,7 @@ class Plot:
 
         plot_manager.register(self)
 
-    def __call__(self, ax, data, *args, **kwargs):
+    def __call__(self, ax, data, ax_opts=None, *args, **kwargs):
         if self.data_requirements is not None:
             # If data check is enable, check data with requirements.
             for requirement in self.data_requirements:
@@ -28,6 +28,9 @@ class Plot:
                     )
 
         self.plot_func(ax, data, *args, **kwargs)
+
+        if ax_opts is not None:
+            ax.set(**ax_opts)
 
 
 def plot(name: str, data_requirements: List = None):

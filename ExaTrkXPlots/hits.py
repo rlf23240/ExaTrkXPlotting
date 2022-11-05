@@ -29,7 +29,7 @@ from ExaTrkXPlotting import plot
 
 
 @plot('exatrkx.hits.2d', ['hits'])
-def hit_plot(ax, data, hit_filter=None, label=None, color=None):
+def hit_plot(ax, data, hit_filter=None, scatter_opts=None):
     """
     Plot hit 2D positions. Require hits dataframe.
     """
@@ -51,16 +51,17 @@ def hit_plot(ax, data, hit_filter=None, label=None, color=None):
     else:
         raise KeyError('No valid coordinate data found.')
 
+    scatter_opts = {
+        's': 8.0
+    } | (scatter_opts or {})
+
     ax.scatter(
-        x, y,
-        s=1.0,
-        label=label,
-        color=color
+        x, y, **scatter_opts
     )
 
     ax.set_xlabel('x [mm]')
     ax.set_ylabel('y [mm]')
     ax.axis('equal')
 
-    if label is not None:
-        ax.legend()
+    ax.legend()
+

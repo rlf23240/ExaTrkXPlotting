@@ -8,20 +8,15 @@ import sklearn.metrics
 
 @plot('exatrkx.performance.score_distribution', ['truth', 'score'])
 def score_distribution(
-    ax,
-    data,
-    log_scale=True,
-    bins=50,
-    title=None
+    ax, data, hist_opts=None
 ):
     """
     Plot score distribution for true and fake data.
 
     :param ax: matplotlib axis object.
     :param data: Data.
-    :param log_scale: Enable log scale for y-axis.
-    :param bins: Bins for histogram
     :param title: Plot title.
+    :param hist_opts: histogram options.
     :return:
     """
     score = data['score']
@@ -30,37 +25,35 @@ def score_distribution(
     # We apply >0.5 in case user pass numerical array.
     truth = (data['truth'] > 0.5)
 
+    hist_opts = {
+        'bins': 50,
+        'log': True,
+        'lw': 2
+    } | (hist_opts or {})
+
     # True target.
     ax.hist(
         score[truth],
-        bins=bins,
-        log=log_scale,
         histtype='step',
-        lw=2,
-        label='true'
+        label='true',
+        **hist_opts
     )
     # False target.
     ax.hist(
         score[~truth],
-        bins=bins,
-        log=log_scale,
         histtype='step',
-        lw=2,
-        label='fake'
+        label='fake',
+        **hist_opts
     )
 
     ax.set_xlabel('Model Output')
+    ax.set_ylabel('Arbitrary Scale')
     ax.legend()
-
-    if title is not None:
-        ax.set_title(title)
 
 
 @plot('exatrkx.performance.roc_curve', ['truth', 'score'])
 def score_roc_curve(
-    ax,
-    data,
-    title=None
+    ax, data,
 ):
     """
     Plot ROC curve.
@@ -105,18 +98,12 @@ def score_roc_curve(
     ax.set_ylabel('True Positive Rate')
     ax.tick_params(width=2, grid_alpha=0.5)
 
-    if title is None:
-        # If no title, use AUC as title.
-        ax.set_title(f'ROC curve, AUC = {auc:.4f}')
-    else:
-        ax.set_title(title)
+    ax.set_title(f'ROC curve, AUC = {auc:.4f}')
 
 
 @plot('exatrkx.performance.precision_recall_with_threshold', ['truth', 'score'])
 def precision_recall_with_threshold(
-    ax,
-    data,
-    title=None
+    ax, data
 ):
     """
     Plot precision and recall change with different threshold.
@@ -152,15 +139,10 @@ def precision_recall_with_threshold(
     ax.tick_params(width=2, grid_alpha=0.5)
     ax.legend(loc='upper right')
 
-    if title is not None:
-        ax.set_title(title)
-
 
 @plot('exatrkx.performance.precision_recall', ['truth', 'score'])
 def precision_recall_curve(
-    ax,
-    data,
-    title=None
+    ax, data
 ):
     """
     Plot precision and recall dependency.
@@ -193,5 +175,3 @@ def precision_recall_curve(
     ax.set_ylabel('Efficiency')
     ax.tick_params(width=2, grid_alpha=0.5)
 
-    if title is not None:
-        ax.set_title(title)

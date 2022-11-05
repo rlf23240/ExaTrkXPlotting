@@ -20,7 +20,7 @@ from ExaTrkXPlotting import plot
 
 
 @plot('exatrkx.train_log', ['history'])
-def train_log(ax, data, tag=None, y_label=None, steps_per_epoch=1, label=None):
+def train_log(ax, data, tag=None, steps_per_epoch=1, plot_opts=None):
     history = data['history']
     if tag is None:
         values = history
@@ -28,13 +28,13 @@ def train_log(ax, data, tag=None, y_label=None, steps_per_epoch=1, label=None):
         values = history[tag]
 
     train_epochs = np.arange(0, len(values)) * 1.0/steps_per_epoch
-    ax.plot(train_epochs, values, label=label)
 
+    plot_opts = plot_opts or {}
+    ax.plot(train_epochs, values, **plot_opts)
+    
     ax.set_xlabel('Epochs')
+    ax.set_ylabel(tag or 'History')
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-    if y_label is not None:
-        ax.set_ylabel(y_label)
+    ax.legend()
 
-    if label is not None:
-        ax.legend()
